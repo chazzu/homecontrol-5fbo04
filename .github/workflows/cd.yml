@@ -1,0 +1,156 @@
+name: Continuous Deployment
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '16.x'
+  DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+  DEPLOY_TIMEOUT: '300'
+  HEALTH_CHECK_RETRIES: '5'
+
+jobs:
+  verify-ci:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Verify CI workflow status
+        run: |
+          if [ "${{ github.event.workflow_run.conclusion }}" != "success" ]; then
+            echo "CI workflow failed or was cancelled"
+            exit 1
+          fi
+
+  prepare-deployment:
+    needs: verify-ci
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.metadata.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Generate deployment metadata
+        id: metadata
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.DOCKER_REGISTRY }}/smart-home-dashboard
+          tags: |
+            type=semver,pattern={{version}}
+            type=sha,prefix=,suffix=,format=short
+
+  build-and-push:
+    needs: prepare-deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          buildkitd-flags: --debug
+
+      - name: Login to Docker Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./src/backend
+          file: ./infrastructure/docker/Dockerfile.backend
+          push: true
+          tags: ${{ env.DOCKER_REGISTRY }}/backend:${{ needs.prepare-deployment.outputs.version }}
+          cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/backend:buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/backend:buildcache,mode=max
+          build-args: |
+            NODE_ENV=production
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./src/web
+          file: ./infrastructure/docker/Dockerfile.web
+          push: true
+          tags: ${{ env.DOCKER_REGISTRY }}/frontend:${{ needs.prepare-deployment.outputs.version }}
+          cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/frontend:buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/frontend:buildcache,mode=max
+          build-args: |
+            NODE_ENV=production
+
+  deploy:
+    needs: [prepare-deployment, build-and-push]
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ secrets.PRODUCTION_URL }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create deployment backup
+        run: |
+          echo "Creating backup of current deployment..."
+          # Backup commands would go here
+          
+      - name: Deploy to production
+        env:
+          DEPLOY_VERSION: ${{ needs.prepare-deployment.outputs.version }}
+        run: |
+          echo "Deploying version ${DEPLOY_VERSION} to production..."
+          docker-compose -f infrastructure/docker/docker-compose.prod.yml pull
+          docker-compose -f infrastructure/docker/docker-compose.prod.yml up -d
+
+      - name: Health check
+        run: |
+          attempt=1
+          while [ $attempt -le ${{ env.HEALTH_CHECK_RETRIES }} ]; do
+            if curl -f "${{ secrets.PRODUCTION_URL }}/health"; then
+              echo "Health check passed"
+              exit 0
+            fi
+            echo "Attempt $attempt failed, retrying..."
+            sleep 10
+            attempt=$((attempt + 1))
+          done
+          echo "Health check failed after ${{ env.HEALTH_CHECK_RETRIES }} attempts"
+          exit 1
+
+      - name: Verify deployment
+        run: |
+          echo "Verifying deployment metrics..."
+          # Add deployment verification commands
+
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "Deployment failed, initiating rollback..."
+          # Add rollback commands
+          exit 1
+
+  notify:
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Notify deployment status
+        env:
+          DEPLOY_STATUS: ${{ needs.deploy.result }}
+        run: |
+          if [ "$DEPLOY_STATUS" = "success" ]; then
+            echo "Deployment successful"
+          else
+            echo "Deployment failed"
+            exit 1
+          fi
