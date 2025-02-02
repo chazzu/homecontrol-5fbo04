@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: smart-home-dashboard-backend
+  namespace: default
+  labels:
+    app: smart-home-dashboard
+    component: backend
+    tier: backend
+    environment: production
+    monitoring: enabled
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "3000"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 3000
+      protocol: TCP
+      name: http
+    - port: 3000
+      targetPort: 3000
+      protocol: TCP
+      name: metrics
+  selector:
+    app: smart-home-dashboard
+    component: backend
+  sessionAffinity: None
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+    - IPv4
