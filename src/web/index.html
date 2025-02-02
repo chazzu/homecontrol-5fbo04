@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <!-- Character encoding and viewport configuration -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    
+    <!-- Primary meta tags -->
+    <meta name="description" content="Smart Home Dashboard - Visual control interface for connected home devices with intuitive floor plan-based management">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+    
+    <!-- Security headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' wss://*.home-assistant.io; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
+    
+    <!-- PWA support -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/src/assets/styles/global.css" as="style">
+    <link rel="preload" href="/src/main.tsx" as="script" type="module">
+    
+    <!-- Primary stylesheet -->
+    <link rel="stylesheet" href="/src/assets/styles/global.css">
+    
+    <!-- Application title -->
+    <title>Smart Home Dashboard</title>
+</head>
+<body class="light-theme">
+    <!-- Skip to main content link for keyboard navigation -->
+    <a href="#root" class="skip-to-main-content visually-hidden">
+        Skip to main content
+    </a>
+
+    <!-- Application root with ARIA attributes -->
+    <div id="root" 
+         role="application" 
+         aria-label="Smart Home Dashboard"
+         tabindex="-1">
+        <!-- Initial loading state -->
+        <noscript>
+            <div class="container text-center p-4">
+                JavaScript is required to run this application.
+            </div>
+        </noscript>
+    </div>
+
+    <!-- Application entry point -->
+    <script type="module" src="/src/main.tsx" async defer></script>
+</body>
+</html>
