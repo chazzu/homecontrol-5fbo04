@@ -1,0 +1,82 @@
+# Build stage
+FROM node:16-alpine AS builder
+
+# Set working directory
+WORKDIR /app
+
+# Install build dependencies
+RUN apk add --no-cache python3 make g++
+
+# Copy package files for dependency installation
+COPY package*.json ./
+
+# Install production dependencies with npm ci for consistent installs
+RUN npm ci --only=production
+
+# Copy TypeScript configuration
+COPY tsconfig.json ./
+
+# Copy source code
+COPY src/ ./src/
+
+# Build TypeScript code
+RUN npm run build
+
+# Prune dev dependencies
+RUN npm prune --production
+
+# Production stage
+FROM node:16-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup -g 1001 -S node && \
+    adduser -u 1001 -S node -G node
+
+# Install runtime dependencies
+RUN apk add --no-cache curl tini
+
+# Copy built files from builder stage
+COPY --from=builder --chown=node:node /app/package*.json ./
+COPY --from=builder --chown=node:node /app/node_modules ./node_modules
+COPY --from=builder --chown=node:node /app/dist ./dist
+
+# Set strict permissions
+RUN chmod -R 755 /app
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV NODE_OPTIONS="--max-old-space-size=512"
+
+# Configure security options
+RUN mkdir -p /tmp && chown node:node /tmp
+VOLUME ["/tmp"]
+
+# Set resource limits
+ENV MEMORY_LIMIT="512M"
+ENV CPU_LIMIT="1.0"
+
+# Switch to non-root user
+USER node
+
+# Expose application port
+EXPOSE 3000
+
+# Health check configuration
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3000/health || exit 1
+
+# Add metadata labels
+LABEL maintainer="Smart Home Dashboard Team" \
+      version="1.0.0" \
+      description="Smart Home Dashboard Backend Service" \
+      security.scan-date="{{BUILD_DATE}}"
+
+# Use tini as init process
+ENTRYPOINT ["/sbin/tini", "--"]
+
+# Set the default command
+CMD ["node", "dist/index.js"]
