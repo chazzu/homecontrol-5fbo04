@@ -1,0 +1,27 @@
+# Unless a later match takes precedence, @global-owner1 and @global-owner2
+# will be requested for review when someone opens a pull request.
+*       @global-owner1 @global-owner2
+
+# Backend team owns all files under src/backend
+src/backend/       @backend-team
+
+# Frontend team owns all files under src/web
+src/web/       @frontend-team
+
+# DevOps team owns infrastructure and GitHub workflow files
+infrastructure/       @devops-team
+.github/workflows/    @devops-team
+
+# TypeScript team reviews all TypeScript files
+*.ts        @typescript-team
+
+# QA team reviews all test files
+*.test.ts   @qa-team
+
+# Lead developer owns package configuration
+package.json    @lead-developer
+
+# Documentation team owns all markdown files
+*.md        @docs-team
+
+# Order is important - the last matching pattern takes precedence
