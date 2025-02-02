@@ -1,0 +1,96 @@
+version: '3.8'
+name: smart-home-dashboard-prod
+
+services:
+  backend:
+    build:
+      context: ../../src/backend
+      dockerfile: ../infrastructure/docker/Dockerfile.backend
+      args:
+        - NODE_ENV=production
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    expose:
+      - 3000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - dashboard-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+  web:
+    build:
+      context: ../../src/web
+      dockerfile: ../infrastructure/docker/Dockerfile.web
+      args:
+        - NODE_ENV=production
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - dashboard-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    configs:
+      - source: nginx_config
+        target: /etc/nginx/conf.d/default.conf
+    volumes:
+      - type: bind
+        source: ./ssl
+        target: /etc/nginx/ssl
+        read_only: true
+
+networks:
+  dashboard-network:
+    driver: bridge
+    internal: true
+    driver_opts:
+      com.docker.network.bridge.enable_icc: 'true'
+      com.docker.network.bridge.enable_ip_masquerade: 'true'
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  node_modules:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/node_modules
+      o: bind
+
+configs:
+  nginx_config:
+    file: ./nginx.conf
