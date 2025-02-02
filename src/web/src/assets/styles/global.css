@@ -1,0 +1,221 @@
+/* global.css - v1.0.0 
+ * Global styles for Smart Home Dashboard
+ * Dependencies: normalize.css@8.0.1
+ */
+
+@import 'normalize.css';
+
+/* CSS Custom Properties - Theme Variables */
+:root {
+  /* Color Scheme */
+  --background-color: var(--theme-background);
+  --text-color: var(--theme-text);
+  --primary-color: var(--theme-primary);
+  --secondary-color: var(--theme-secondary);
+  --border-color: var(--theme-border);
+  --success-color: var(--theme-success);
+  --warning-color: var(--theme-warning);
+  --error-color: var(--theme-error);
+  --surface-color: var(--theme-surface);
+  --overlay-color: var(--theme-overlay);
+
+  /* Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  
+  /* Spacing */
+  --spacing-unit: 8px;
+  
+  /* Borders & Radius */
+  --border-radius: 4px;
+  
+  /* Animation */
+  --transition-duration: 0.2s;
+  
+  /* Z-index Layers */
+  --layer-base: 0;
+  --layer-overlay: 100;
+  --layer-modal: 1000;
+  
+  /* Elevation (Shadows) */
+  --shadow-elevation-1: 0 2px 4px rgba(0,0,0,0.1);
+  --shadow-elevation-2: 0 4px 8px rgba(0,0,0,0.1);
+  --shadow-elevation-3: 0 8px 16px rgba(0,0,0,0.1);
+  
+  /* Motion Preferences */
+  --motion-safe: var(--transition-duration);
+  --motion-reduce: 0.001s;
+}
+
+/* Reset and Base Styles */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  font-family: var(--font-family);
+  color: var(--text-color);
+  background-color: var(--background-color);
+}
+
+body {
+  min-height: 100vh;
+  text-rendering: optimizeSpeed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Accessibility */
+.visually-hidden,
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus Styles */
+:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: var(--motion-reduce) !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: var(--motion-reduce) !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Layout Utility Classes */
+.container {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: var(--spacing-unit);
+}
+
+.flex {
+  display: flex;
+}
+
+.grid {
+  display: grid;
+}
+
+.hidden {
+  display: none;
+}
+
+.visible {
+  display: block;
+}
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+/* Spacing Utility Classes */
+.m-0 { margin: 0; }
+.m-1 { margin: calc(var(--spacing-unit) * 1); }
+.m-2 { margin: calc(var(--spacing-unit) * 2); }
+.m-3 { margin: calc(var(--spacing-unit) * 3); }
+.m-4 { margin: calc(var(--spacing-unit) * 4); }
+
+.p-0 { padding: 0; }
+.p-1 { padding: calc(var(--spacing-unit) * 1); }
+.p-2 { padding: calc(var(--spacing-unit) * 2); }
+.p-3 { padding: calc(var(--spacing-unit) * 3); }
+.p-4 { padding: calc(var(--spacing-unit) * 4); }
+
+.gap-1 { gap: calc(var(--spacing-unit) * 1); }
+.gap-2 { gap: calc(var(--spacing-unit) * 2); }
+.gap-3 { gap: calc(var(--spacing-unit) * 3); }
+.gap-4 { gap: calc(var(--spacing-unit) * 4); }
+
+/* Typography Utility Classes */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.break-word {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Theme Classes */
+.theme-light {
+  color-scheme: light;
+}
+
+.theme-dark {
+  color-scheme: dark;
+}
+
+.high-contrast {
+  --primary-color: #000000;
+  --text-color: #000000;
+  --background-color: #ffffff;
+  --border-color: #000000;
+}
+
+/* Responsive Breakpoints */
+@media screen and (min-width: 640px) {
+  .container {
+    max-width: 640px;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .container {
+    max-width: 768px;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+}
+
+@media screen and (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  * {
+    background: transparent !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+}
