@@ -62,7 +62,7 @@
     "eslint-plugin-react": "^7.0.0",
     "eslint-plugin-react-hooks": "^4.0.0",
     "jest": "^29.5.0",
-    "jest-axe": "^7.0.0",
+    "jest-axe": "^9.0.0",
     "jest-environment-jsdom": "^29.5.0",
     "jest-performance": "^1.0.0",
     "jest-styled-components": "^7.0.0",
