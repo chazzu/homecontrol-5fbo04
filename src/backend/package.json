@@ -40,7 +40,7 @@
     "node-cache": "5.1.2",
     "opossum": "6.0.0",
     "semver": "7.5.0",
-    "svgo": "3.0.0",
+    "svgo": "3.3.2",
     "validator": "^13.9.0",
     "winston": "3.8.0",
     "winston-daily-rotate-file": "^4.7.0",
