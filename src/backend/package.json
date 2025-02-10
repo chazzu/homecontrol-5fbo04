@@ -39,7 +39,7 @@
     "morgan": "^1.10.0",
     "node-cache": "5.1.2",
     "opossum": "6.0.0",
-    "semver": "7.5.0",
+    "semver": "7.7.1",
     "svgo": "3.0.0",
     "validator": "^13.9.0",
     "winston": "3.8.0",
