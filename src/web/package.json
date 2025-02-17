@@ -57,7 +57,7 @@
     "@testing-library/user-event": "^14.0.0",
     "@axe-core/react": "^4.7.0",
     "@react-hook/performance": "^1.0.0",
-    "eslint": "^8.0.0",
+    "eslint": "^9.20.1",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-react": "^7.0.0",
     "eslint-plugin-react-hooks": "^4.0.0",
